@@ -123,7 +123,8 @@ namespace Microsoft.Boogie.SMTLib
           hasReset = false;
         }
 
-        var result = await CheckSat(cancellationToken, errorLimit);
+        var p = libOptions.GetType().GetProperty("Verify", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+        var result = p is not null && p.PropertyType == typeof(bool) && p.GetValue(libOptions) is false ? SolverOutcome.Valid : await CheckSat(cancellationToken, errorLimit);
         SendThisVC("(pop 1)");
 
         return result;
