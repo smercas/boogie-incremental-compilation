@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BoogieDriver": {
+      "commandName": "Project",
+      "commandLineArgs": "\"../../../../../../../big-ahh-inc-comp-test/o/new_old___IPM__m.bpl\"\r\n/noVerify\r\n/proverLog:\"../../../../../../../big-ahh-inc-comp-test/o/new_old___IPM__m.smt2\""
+    }
+  }
+}
