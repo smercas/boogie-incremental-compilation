@@ -553,10 +553,10 @@ namespace Microsoft.Boogie
         action(Options, processedProgram);
       }
 
-      if (!Options.Verify)
-      {
-        return PipelineOutcome.Done;
-      }
+      // if (!Options.Verify)
+      // {
+      //   return PipelineOutcome.Done;
+      // }
 
       if (Options.ContractInfer)
       {
