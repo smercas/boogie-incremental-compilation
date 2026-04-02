@@ -249,7 +249,14 @@ namespace Microsoft.Boogie
       PrintBplFile(Options, filename, program, allowPrintDesugaring, setTokens, pretty);
     }
 
-    public static void PrintBplFile(ExecutionEngineOptions options, string filename, Program program, 
+    public abstract record Filename(string value);
+    public sealed record Normal(string value) : Filename(value);
+    public sealed record Forced(string value) : Filename(value);
+
+    public static void PrintBplFile(ExecutionEngineOptions options, string filename, Program program,
+      bool allowPrintDesugaring, bool setTokens = true,
+      bool pretty = false) => PrintBplFile(options, new Normal(filename), program, allowPrintDesugaring, setTokens, pretty);
+    public static void PrintBplFile(ExecutionEngineOptions options, Filename filename, Program program, 
       bool allowPrintDesugaring, bool setTokens = true,
       bool pretty = false)
 
@@ -262,9 +269,9 @@ namespace Microsoft.Boogie
         options.PrintDesugarings = false;
       }
 
-      using (TokenTextWriter writer = filename == "-"
+      using (TokenTextWriter writer = filename is Normal { value: "-" } or Forced
         ? new TokenTextWriter("<console>", options.OutputWriter, setTokens, pretty, options)
-        : new TokenTextWriter(filename, setTokens, pretty, options))
+        : new TokenTextWriter(filename.value, setTokens, pretty, options))
       {
         if (options.ShowEnv != ExecutionEngineOptions.ShowEnvironment.Never)
         {
