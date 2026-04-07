@@ -27,7 +27,7 @@ public interface ExecutionEngineOptions : HoudiniOptions, ConcurrencyOptions {
       private static IReadOnlyList<double> percentagesFrom(IReadOnlyList<double> parentPercentages, TimeSpan parentDuration, TimeSpan duration) {
         var result = new List<double>(parentPercentages.Count + 1) { duration / parentDuration };
         foreach (var percentage in parentPercentages.Reversed()) {
-          result.Add(percentage * result[^1]);
+          result.Add(percentage * result[0]);
         }
         return result.Reversed();
       }
@@ -60,6 +60,10 @@ public interface ExecutionEngineOptions : HoudiniOptions, ConcurrencyOptions {
     public override async Task WriteResultsTo(TextWriter writer) {
       if (!(visiting.Count == 1 && visiting.Peek().Pre.Count == 0)) { throw new InvalidOperationException("can't do this when still in a section"); }
       IReadOnlyList<Result> durations = visiting.Peek().Post;
+      if (durations is [One o]) {
+        await writer.WriteLineAsync($"{o.Text}: {o.Duration}");
+        return;
+      }
       if (durations is [Multiple m]) {
         await writer.WriteLineAsync($"{m.Text}: {m.Duration}");
         durations = m.Durations;
