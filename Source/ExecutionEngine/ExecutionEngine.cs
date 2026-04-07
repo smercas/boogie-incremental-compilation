@@ -773,26 +773,38 @@ namespace Microsoft.Boogie
     
     public async Task<IReadOnlyList<IVerificationTask>> GetVerificationTasks(Program program, CancellationToken cancellationToken = default)
     {
+      var profiler = Options.Profiler;
       var sink = new CollectingErrorSink();
-      var resolutionErrors = program.Resolve(Options, sink);
-      
+      int resolutionErrors;
+      using (profiler.NewSection("resolution")) {
+        resolutionErrors = program.Resolve(Options, sink);
+      }
+
       string GetErrorsString() => string.Join("\n", sink.Errors.Select(t => $"{t.Token}: {t.Message}"));
       if (resolutionErrors > 0)
       {
         throw new ArgumentException($"Boogie program had {resolutionErrors} resolution errors:\n{GetErrorsString()}");
       }
-      var typeErrors = program.Typecheck(Options, sink);
+
+      int typeErrors;
+      using (profiler.NewSection("type check")) {
+        typeErrors = program.Typecheck(Options, sink);
+      }
       if (typeErrors > 0)
       {
         throw new ArgumentException($"Boogie program had {typeErrors} type errors:\n{GetErrorsString()}");
       }
 
-      EliminateDeadVariables(program);
-      CollectModifies(program);
-      CoalesceBlocks(program);
-      Inline(program);
+      ProcessedProgram processedProgram;
+      using (profiler.NewSection("preprocessing")) {
+        EliminateDeadVariables(program);
+        CollectModifies(program);
+        CoalesceBlocks(program);
+        Inline(program);
 
-      var processedProgram = await PreProcessProgramVerification(program, cancellationToken);
+        processedProgram = await PreProcessProgramVerification(program, cancellationToken);
+      }
+      using var __ = profiler.NewSection($"computing splits");
       return GetPrioritizedImplementations(program).SelectMany(implementation =>
       {
         var writer = TextWriter.Null;
