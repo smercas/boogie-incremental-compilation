@@ -13,8 +13,10 @@ namespace Microsoft.Boogie
   /// Boogie command-line options (other tools can subclass this class in order to support a
   /// superset of Boogie's options).
   /// </summary>
-  public class CommandLineOptions : CommandLineOptionEngine, ExecutionEngineOptions
-  {
+  public class CommandLineOptions : CommandLineOptionEngine, ExecutionEngineOptions {
+
+    public ExecutionEngineOptions.BaseProfiler Profiler { get; set; } = new ExecutionEngineOptions.NullProfiler();
+
     public static CommandLineOptions FromArguments(TextWriter outputWriter, params string[] arguments)
     {
       return FromArguments(outputWriter, new ConsolePrinter(), arguments);

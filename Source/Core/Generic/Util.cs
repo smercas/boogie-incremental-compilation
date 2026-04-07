@@ -5,6 +5,12 @@ namespace Microsoft.Boogie
 {
   public static class Util
   {
+    public sealed class EmptyDisposable : IDisposable { public void Dispose() { } }
+    public sealed class DisposableAction(Action action) : IDisposable {
+      private Action action { get; } = action;
+      public void Dispose() { action(); }
+    }
+
     public static void Shuffle<T>(Random random, IList<T> list)  
     {  
       for(var index = list.Count - 1; index > 0; index--) {
